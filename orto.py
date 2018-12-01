@@ -53,7 +53,7 @@ validation_data_dir = '../data/testtiled'
 nb_train_samples = 9000 
 nb_validation_samples = 3000 
 epochs = 15 
-batch_size = 96 
+batch_size = 48 
 
 if K.image_data_format() == 'channels_first':
     input_shape = (1, img_width, img_height)
@@ -77,14 +77,16 @@ model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Flatten())
+model.add(Dropout(0.5))
 model.add(Dense(128))
 model.add(Activation('relu'))
+model.add(Dropout(0.5))
 model.add(Dense(128))
 model.add(Activation('relu'))
 model.add(Dense(4, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=SGD(lr=0.01, momentum=0.0),
+              optimizer=SGD(lr=0.001, momentum=0.8),
               metrics=['accuracy'])
 
 # this is the augmentation configuration we will use for training
@@ -115,10 +117,16 @@ validation_generator = test_datagen.flow_from_directory(
     batch_size=batch_size,
     class_mode='categorical')
 
+class_weight = {0: 2.,
+                1: 1.,
+                2: 1.,
+                3: 6.}
+
 model.fit_generator(
     train_generator,
     steps_per_epoch=nb_train_samples // batch_size,
     epochs=epochs,
+    class_weight=class_weight,
     validation_data=validation_generator,
     validation_steps=nb_validation_samples // batch_size)
 

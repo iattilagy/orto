@@ -1,0 +1,8 @@
+#!/bin/bash
+mkdir -p $2
+for f in $1/*; do
+	n=$(grep -m1 -ao '[0-4]' /dev/urandom | head -n1)
+	if [ $n == 0 ]; then
+		mv $f $2/
+	fi 
+done 
